@@ -168,11 +168,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
       <div id="login-error" class="alert alert-error hidden"></div>
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="login-email" value="admin@educore.com"/>
+        <input type="email" id="login-email" value="2400031447@kluniversity.in"/>
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="login-password" value="admin123"/>
+        <input type="password" id="login-password" value="jannu123"/>
       </div>
             <div>
         <span class="captcha-label">Security Verification</span>
@@ -183,7 +183,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         </div>
       </div>
       <button class="btn-primary full-width" onclick="login()">Sign In to Dashboard</button>
-      <p class="login-hint">📧 admin@educore.com &nbsp;|&nbsp; 🔑 admin123</p>
+      <p class="login-hint">📧  2400031447@kluniversity.in  &nbsp;|&nbsp; 🔑 jannu123</p>
+      <!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+</head>
+<body>
+  <h2>Sign Up Form</h2>
+  <form action="/submit_signup" method="post">
+    <!-- Name -->
+    <label for="name">Full Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <!-- Email -->
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <!-- Password -->
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <!-- Confirm Password -->
+    <label for="confirm_password">Confirm Password:</label><br>
+    <input type="password" id="confirm_password" name="confirm_password" required><br><br>
+
+    <!-- Gender -->
+    <label for="gender">Gender:</label><br>
+    <select id="gender" name="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+      <option value="other">Other</option>
+    </select><br><br>
+
+    <!-- Terms -->
+    <input type="checkbox" id="terms" name="terms" required>
+    <label for="terms">I agree to the Terms & Conditions</label><br><br>
+
+    <!-- Submit -->
+    <button type="submit">Sign Up</button>
+  </form>
+</body>
+</html>
+
     </div>
   </div>
 </div>
