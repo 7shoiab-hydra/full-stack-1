@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduCore ERP – School Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b35;--navy2:#162444;--gold:#b8923a;--gold-lt:#f4e4c1;
+  --cream:#faf7f2;--mist:#eef1f6;--white:#fff;--text:#1a1a2e;
+  --muted:#5a6378;--border:rgba(13,27,53,0.10);
+  --success:#1a7f4b;--success-bg:#e8f5ef;
+  --danger:#c0392b;--danger-bg:#fdecea;
+  --warning:#d97706;--warning-bg:#fef3e2;
+  --sw:240px;
+}
+html{font-size:15px}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);line-height:1.6}
+.page{display:none}.page.active{display:block}
+
+/* LOGIN */
+.login-bg{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,#1e3a6e 100%);display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--white);border-radius:12px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,0.25)}
+.login-header{text-align:center;margin-bottom:32px}
+.logo-big{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--navy)}
+.logo-big span{color:var(--gold)}
+.login-header p{color:var(--muted);font-size:14px;margin-top:6px}
+.login-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:16px;padding:10px;background:var(--mist);border-radius:6px}
+
+/* APP */
+#app-page{display:flex;min-height:100vh}
+.sidebar{width:var(--sw);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto}
+.sidebar-logo{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#fff;padding:28px 24px 20px;border-bottom:.5px solid rgba(255,255,255,0.08)}
+.sidebar-logo span{color:var(--gold)}
+.sidebar-nav{flex:1;padding:16px 0}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;text-decoration:none}
+.nav-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.nav-item:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.05)}
+.nav-item.active{color:#fff;background:rgba(184,146,58,0.12);border-left-color:var(--gold)}
+.sidebar-footer{padding:20px 20px 24px;border-top:.5px solid rgba(255,255,255,0.08)}
+.user-info{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--navy)}
+.user-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.9)}
+.user-role{font-size:11px;color:rgba(255,255,255,0.4)}
+.btn-logout{width:100%;padding:8px;background:rgba(255,255,255,0.06);border:.5px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s;font-family:inherit}
+.btn-logout:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+.main-content{margin-left:var(--sw);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{padding:22px 32px 18px;border-bottom:.5px solid var(--border);background:var(--white);display:flex;justify-content:space-between;align-items:center}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--navy)}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.topbar-right{display:flex;gap:10px}
+
+.section{display:none;padding:26px 32px}
+.section.active{display:block}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.metric-card{background:var(--white);border:.5px solid var(--border);border-radius:10px;padding:18px 20px;border-top:2px solid var(--gold)}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--navy);display:block}
+.metric-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.dash-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+
+/* CARD */
+.card{background:var(--white);border:.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.card-header{padding:14px 20px;border-bottom:.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.card-header h3{font-size:14px;font-weight:500;color:var(--navy)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-input{flex:1;min-width:180px;padding:8px 12px;border:.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--white);outline:none;font-family:inherit}
+.search-input:focus,.filter-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,58,0.08)}
+.filter-select{padding:8px 10px;border:.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--white);outline:none;font-family:inherit;cursor:pointer}
+
+/* TABLE */
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table thead tr{background:var(--mist)}
+.table th{padding:9px 13px;text-align:left;font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.table td{padding:10px 13px;border-top:.5px solid var(--border);color:var(--text)}
+.table tbody tr:hover{background:#fafbfc}
+.empty-row{text-align:center;color:var(--muted);padding:28px!important;font-size:13px}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.badge-success{background:var(--success-bg);color:var(--success)}
+.badge-danger{background:var(--danger-bg);color:var(--danger)}
+.badge-warning{background:var(--warning-bg);color:var(--warning)}
+.badge-info{background:#e8f0fe;color:#1a56d6}
+.grade-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.g-ap{background:#e8f5ef;color:#1a7f4b}.g-a{background:#e8f0fe;color:#1a56d6}
+.g-bp{background:#fef3e2;color:#d97706}.g-b{background:#fff3cd;color:#856404}.g-c{background:#fdecea;color:#c0392b}
+
+/* BUTTONS */
+.btn-primary{padding:8px 18px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-primary:hover{background:var(--gold)}
+.btn-primary.full-width{width:100%;padding:13px;font-size:15px}
+.btn-outline{padding:8px 18px;background:transparent;color:var(--navy);border:.5px solid var(--border);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-outline:hover{background:var(--mist)}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:4px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .15s}
+.btn-sm-primary{background:var(--navy);color:#fff}.btn-sm-primary:hover{background:var(--gold)}
+.btn-sm-danger{background:var(--danger-bg);color:var(--danger)}.btn-sm-danger:hover{background:var(--danger);color:#fff}
+.btn-sm-success{background:var(--success-bg);color:var(--success)}.btn-sm-success:hover{background:var(--success);color:#fff}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-group label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select,.form-group textarea{padding:8px 11px;border:.5px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;background:var(--white);transition:border-color .15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,58,0.08)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ALERTS */
+.alert{padding:9px 13px;border-radius:6px;font-size:13px;margin-bottom:8px}
+.alert-error{background:var(--danger-bg);color:var(--danger);border:.5px solid rgba(192,57,43,.2)}
+.alert-success{background:var(--success-bg);color:var(--success);border:.5px solid rgba(26,127,75,.2)}
+.hidden{display:none!important}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;background:var(--white);border-radius:12px;width:100%;max-width:540px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:.5px solid var(--border)}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--navy)}
+.modal-header button{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px}
+.modal-body{padding:22px}
+.modal-footer{padding:14px 22px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+/* CLASS DIST */
+.dist-item{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:.5px solid var(--border)}
+.dist-item:last-child{border-bottom:none}
+.dist-class{font-size:13px;font-weight:500;min-width:60px}
+.dist-bar{flex:1;height:7px;background:var(--mist);border-radius:4px;overflow:hidden}
+.dist-bar-fill{height:100%;background:var(--gold);border-radius:4px}
+.dist-count{font-size:13px;color:var(--muted);min-width:28px;text-align:right}
+
+/* ATTENDANCE */
+.att-radio{display:flex;gap:6px}
+.att-radio label{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:3px 7px;border-radius:4px;border:.5px solid var(--border)}
+.att-radio input[type=radio]{accent-color:var(--gold)}
+
+/* CLASS DIST BAR CHART */
+.bar-chart{padding:16px 20px}
+.bar-item{margin-bottom:12px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.bar-track{height:8px;background:var(--mist);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--gold);border-radius:4px}
+
+/* CAPTCHA */
+.captcha-box{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:var(--mist);border-radius:8px;border:.5px solid var(--border)}
+.captcha-canvas{border-radius:6px;cursor:pointer;flex-shrink:0;border:.5px solid var(--border)}
+.captcha-input{flex:1;padding:8px 11px;border:.5px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;background:var(--white)}
+.captcha-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,58,0.08)}
+.captcha-refresh{background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);padding:2px 4px;transition:transform .3s}
+.captcha-refresh:hover{transform:rotate(180deg);color:var(--gold)}
+.captcha-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page" class="page active">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-big">Edu<span>Core</span></div>
+        <p>School Management System</p>
+      </div>
+      <div id="login-error" class="alert alert-error hidden"></div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" value="admin@educore.com"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" value="admin123"/>
+      </div>
+            <div>
+        <span class="captcha-label">Security Verification</span>
+        <div class="captcha-box">
+          <canvas id="captcha-canvas" class="captcha-canvas" width="140" height="44" title="Click to refresh CAPTCHA" onclick="genCaptcha()"></canvas>
+          <button class="captcha-refresh" onclick="genCaptcha()" title="Refresh">&#8635;</button>
+          <input class="captcha-input" id="captcha-input" placeholder="Enter answer" maxlength="5"/>
+        </div>
+      </div>
+      <button class="btn-primary full-width" onclick="login()">Sign In to Dashboard</button>
+      <p class="login-hint">📧 admin@educore.com &nbsp;|&nbsp; 🔑 admin123</p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-page" class="page">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Edu<span>Core</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="show('dashboard')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+      </a>
+      <a class="nav-item" onclick="show('students')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students
+      </a>
+      <a class="nav-item" onclick="show('staff')">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Staff
+      </a>
+      <a class="nav-item" onclick="show('fees')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fees
+      </a>
+      <a class="nav-item" onclick="show('attendance')">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Attendance
+      </a>
+      <a class="nav-item" onclick="show('exams')">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Exams
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div><div class="user-name">Admin</div><div class="user-role">Super Admin</div></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+        <p class="page-sub" id="page-sub">Welcome back! Here's today's overview.</p>
+      </div>
+      <div class="topbar-right" id="topbar-actions"></div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="sec-dashboard" class="section active">
+      <div class="metrics-grid" id="dash-metrics"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header"><h3>Recent Fee Payments</h3></div>
+          <table class="table" id="dash-fee-table">
+            <thead><tr><th>Student</th><th>Class</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Class Distribution</h3></div>
+          <div class="bar-chart" id="class-dist"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section id="sec-students" class="section">
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search students…" oninput="renderStudents(this.value)"/>
+        <select class="filter-select" onchange="studentClassFilter=this.value;renderStudents()">
+          <option value="">All Classes</option>
+          <option>VI</option><option>VII</option><option>VIII</option>
+          <option>IX</option><option>X</option><option>XI</option><option>XII</option>
+        </select>
+        <button class="btn-primary" onclick="openModal('m-add-student')">+ Add Student</button>
+      </div>
+      <div class="card">
+        <table class="table" id="student-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Class</th><th>Parent</th><th>Phone</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STAFF -->
+    <section id="sec-staff" class="section">
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search staff…" oninput="renderStaff(this.value)"/>
+        <button class="btn-primary" onclick="openModal('m-add-staff')">+ Add Staff</button>
+      </div>
+      <div class="card">
+        <table class="table" id="staff-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Salary</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FEES -->
+    <section id="sec-fees" class="section">
+      <div class="toolbar">
+        <select class="filter-select" onchange="feeStatusFilter=this.value;renderFees()">
+          <option value="">All Fees</option><option value="paid">Paid</option><option value="pending">Pending</option>
+        </select>
+        <button class="btn-primary" onclick="openModal('m-add-fee')">+ Record Payment</button>
+      </div>
+      <div class="card">
+        <table class="table" id="fee-table">
+          <thead><tr><th>Receipt</th><th>Student</th><th>Class</th><th>Type</th><th>Month</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="sec-attendance" class="section">
+      <div class="toolbar">
+        <input type="date" class="filter-select" id="att-date"/>
+        <select class="filter-select" id="att-class">
+          <option value="">All Classes</option>
+          <option>VI</option><option>VII</option><option>VIII</option>
+          <option>IX</option><option>X</option><option>XI</option><option>XII</option>
+        </select>
+        <button class="btn-primary" onclick="renderAttendance()">Load</button>
+        <button class="btn-outline" onclick="saveAttendance()">Save Attendance</button>
+      </div>
+      <div class="card">
+        <table class="table" id="att-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- EXAMS -->
+    <section id="sec-exams" class="section">
+      <div class="toolbar">
+        <select class="filter-select" onchange="examClassFilter=this.value;renderExams()">
+          <option value="">All Classes</option>
+          <option>VI</option><option>VII</option><option>VIII</option>
+          <option>IX</option><option>X</option><option>XI</option><option>XII</option>
+        </select>
+        <button class="btn-primary" onclick="openModal('m-add-exam')">+ Add Result</button>
+      </div>
+      <div class="card">
+        <table class="table" id="exam-table">
+          <thead><tr><th>Student</th><th>Class</th><th>Exam</th><th>Subject</th><th>Max</th><th>Scored</th><th>Grade</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()"></div>
+
+<!-- Add Student -->
+<div id="m-add-student" class="modal hidden">
+  <div class="modal-header"><h3>Add New Student</h3><button onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-row">
+      <div class="form-group"><label>Full Name *</label><input id="s-name" placeholder="Student name"/></div>
+      <div class="form-group"><label>Email</label><input id="s-email" type="email" placeholder="Email"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input id="s-phone" placeholder="Phone"/></div>
+      <div class="form-group"><label>Gender</label><select id="s-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Class *</label><select id="s-class"><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI</option><option>XII</option></select></div>
+      <div class="form-group"><label>Section</label><select id="s-section"><option>A</option><option>B</option><option>C</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Parent Name</label><input id="s-parent" placeholder="Parent name"/></div>
+      <div class="form-group"><label>Parent Phone</label><input id="s-pphone" placeholder="Parent phone"/></div>
+    </div>
+    <div class="form-group"><label>Date of Birth</label><input id="s-dob" type="date"/></div>
+    <div id="s-msg" class="alert hidden"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-outline" onclick="closeModal()">Cancel</button>
+    <button class="btn-primary" onclick="addStudent()">Add Student</button>
+  </div>
+</div>
+
+<!-- Add Staff -->
+<div id="m-add-staff" class="modal hidden">
+  <div class="modal-header"><h3>Add New Staff</h3><button onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-row">
+      <div class="form-group"><label>Full Name *</label><input id="st-name" placeholder="Staff name"/></div>
+      <div class="form-group"><label>Email</label><input id="st-email" type="email" placeholder="Email"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Department *</label><input id="st-dept" placeholder="e.g. Mathematics"/></div>
+      <div class="form-group"><label>Designation</label><input id="st-desig" placeholder="e.g. Teacher"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input id="st-phone" placeholder="Phone"/></div>
+      <div class="form-group"><label>Salary (₹)</label><input id="st-salary" type="number" placeholder="Monthly salary"/></div>
+    </div>
+    <div id="st-msg" class="alert hidden"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-outline" onclick="closeModal()">Cancel</button>
+    <button class="btn-primary" onclick="addStaff()">Add Staff</button>
+  </div>
+</div>
+
+<!-- Add Fee -->
+<div id="m-add-fee" class="modal hidden">
+  <div class="modal-header"><h3>Record Fee Payment</h3><button onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Select Student *</label>
+      <select id="f-student"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Amount (₹) *</label><input id="f-amount" type="number" placeholder="2500"/></div>
+      <div class="form-group"><label>Fee Type</label><select id="f-type"><option>Tuition Fee</option><option>Exam Fee</option><option>Transport Fee</option><option>Library Fee</option><option>Sports Fee</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Month</label><select id="f-month"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+      <div class="form-group"><label>Status</label><select id="f-status"><option value="paid">Paid</option><option value="pending">Pending</option></select></div>
+    </div>
+    <div class="form-group"><label>Remarks</label><input id="f-remarks" placeholder="Optional remarks"/></div>
+    <div id="f-msg" class="alert hidden"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-outline" onclick="closeModal()">Cancel</button>
+    <button class="btn-primary" onclick="addFee()">Record Payment</button>
+  </div>
+</div>
+
+<!-- Add Exam -->
+<div id="m-add-exam" class="modal hidden">
+  <div class="modal-header"><h3>Add Exam Result</h3><button onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-row">
+      <div class="form-group"><label>Select Student *</label><select id="e-student"></select></div>
+      <div class="form-group"><label>Exam Name *</label><input id="e-exam" placeholder="e.g. Mid-Term 2025"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Subject *</label><input id="e-subject" placeholder="e.g. Mathematics"/></div>
+      <div class="form-group"><label>Exam Date</label><input id="e-date" type="date"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Max Marks</label><input id="e-max" type="number" value="100"/></div>
+      <div class="form-group"><label>Marks Obtained *</label><input id="e-obtained" type="number" placeholder="Marks scored"/></div>
+    </div>
+    <div id="e-msg" class="alert hidden"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-outline" onclick="closeModal()">Cancel</button>
+    <button class="btn-primary" onclick="addExam()">Save Result</button>
+  </div>
+</div>
+
+<script>
+// ── DATA STORE (localStorage) ─────────────────────────────────────────────────
+const KEYS = { students:'erp_students', staff:'erp_staff', fees:'erp_fees', attendance:'erp_attendance', exams:'erp_exams' };
+
+function load(k){ try{ return JSON.parse(localStorage.getItem(KEYS[k])||'[]') }catch{ return [] } }
+function save(k,d){ localStorage.setItem(KEYS[k], JSON.stringify(d)) }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6) }
+
+// ── SEED DATA ─────────────────────────────────────────────────────────────────
+function seedIfEmpty(){
+  if(load('students').length) return;
+  const names=[['Aarav Sharma','Male'],['Priya Patel','Female'],['Rohit Verma','Male'],['Sneha Reddy','Female'],
+    ['Karan Singh','Male'],['Divya Nair','Female'],['Arjun Mehta','Male'],['Pooja Iyer','Female'],
+    ['Vijay Kumar','Male'],['Lakshmi Rao','Female'],['Rahul Gupta','Male'],['Ananya Joshi','Female'],
+    ['Suresh Pillai','Male'],['Kavita Desai','Female'],['Mohan Das','Male'],['Sunita Yadav','Female'],
+    ['Anil Chandra','Male'],['Ritu Agarwal','Female'],['Deepak Nair','Male'],['Meera Srinivasan','Female']];
+  const classes=['VI','VII','VIII','IX','X','XI','XII'];
+  const secs=['A','B','C'];
+  const students = names.map(([name,gender],i)=>({
+    id: uid(), student_id:`STU${String(i+1).padStart(4,'0')}`,
+    name, email:`${name.toLowerCase().replace(/ /g,'.')}@school.com`,
+    phone:`98${String(Math.floor(Math.random()*1e8)).padStart(8,'0')}`,
+    gender, class:classes[i%classes.length], section:secs[i%secs.length],
+    parent_name:`Parent of ${name}`,
+    parent_phone:`97${String(Math.floor(Math.random()*1e8)).padStart(8,'0')}`,
+    dob:'', status:'active', created:Date.now()-i*86400000
+  }));
+  save('students', students);
+
+  const staffList=[
+    ['Mr. Rajesh Kumar','Mathematics','Senior Teacher',52000],
+    ['Mrs. Sunita Sharma','English','HOD',60000],
+    ['Mr. Anil Verma','Science','Teacher',46000],
+    ['Ms. Preethi Nair','Social Studies','Teacher',44000],
+    ['Mr. Suresh Rajan','Computer Science','HOD',62000],
+    ['Mrs. Lakshmi Devi','Hindi','Teacher',43000],
+    ['Mr. Ravi Shankar','Physical Education','Teacher',40000],
+    ['Ms. Anjali Mehta','Arts','Teacher',38000]
+  ];
+  save('staff', staffList.map(([name,dept,desig,salary],i)=>({
+    id:uid(), staff_id:`STF${String(i+1).padStart(3,'0')}`,
+    name, email:`${name.toLowerCase().replace(/[. ]/g,'')}@educore.com`,
+    phone:`96${String(Math.floor(Math.random()*1e8)).padStart(8,'0')}`,
+    gender: i%2===0?'Male':'Female', department:dept, designation:desig,
+    salary, status:'active', created:Date.now()
+  })));
+
+  const months=['January','February','March','April'];
+  const feeTypes=['Tuition Fee'];
+  const fees=[];
+  let rcpNo=1001;
+  students.forEach(s=>{
+    months.forEach(month=>{
+      const paid=Math.random()>0.25;
+      fees.push({
+        id:uid(), student_id:s.id, student_name:s.name, class:s.class,
+        amount:2500, fee_type:'Tuition Fee', month,
+        status:paid?'paid':'pending',
+        receipt_no:`RCP${rcpNo++}`, remarks:'',
+        paid_date: paid? new Date(Date.now()-Math.random()*30*864e5).toISOString().split('T')[0] : '',
+        created: Date.now()-Math.random()*30*864e5
+      });
+    });
+  });
+  save('fees', fees);
+
+  // Attendance last 20 school days
+  const attRecs=[];
+  const today=new Date();
+  students.forEach(s=>{
+    let cnt=0;
+    for(let d=0;cnt<20;d++){
+      const dt=new Date(today); dt.setDate(today.getDate()-d);
+      const day=dt.getDay(); if(day===0||day===6) continue; cnt++;
+      const r=Math.random();
+      attRecs.push({ id:uid(), student_id:s.id, student_name:s.name,
+        class:s.class, date:dt.toISOString().split('T')[0],
+        status:r>0.08?'present':r>0.04?'late':'absent' });
+    }
+  });
+  save('attendance', attRecs);
+
+  const subjects=['Mathematics','English','Science','Social Studies','Hindi'];
+  const exams=[];
+  students.forEach(s=>{
+    subjects.forEach(sub=>{
+      const m=Math.floor(Math.random()*38+62);
+      exams.push({ id:uid(), student_id:s.id, student_name:s.name,
+        class:s.class, exam_name:'Mid-Term 2025', subject:sub,
+        max_marks:100, obtained_marks:m, grade:calcGrade(m),
+        exam_date:'2025-09-15', created:Date.now() });
+    });
+  });
+  save('exams', exams);
+}
+
+function calcGrade(m){ return m>=90?'A+':m>=80?'A':m>=70?'B+':m>=60?'B':'C' }
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+const ADMIN = { email:'admin@educore.com', password:'admin123' };
+// ── CAPTCHA ───────────────────────────────────────────────────────────────────
+let captchaAnswer = 0;
+function genCaptcha(){
+  const canvas = document.getElementById('captcha-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const ops = ['+','-','×'];
+  const op = ops[Math.floor(Math.random()*ops.length)];
+  let a,b;
+  if(op==='+'){a=Math.floor(Math.random()*30+5);b=Math.floor(Math.random()*30+5);captchaAnswer=a+b;}
+  else if(op==='-'){a=Math.floor(Math.random()*30+15);b=Math.floor(Math.random()*15+1);captchaAnswer=a-b;}
+  else{a=Math.floor(Math.random()*9+2);b=Math.floor(Math.random()*9+2);captchaAnswer=a*b;}
+
+  // Draw background
+  ctx.clearRect(0,0,140,44);
+  const grad = ctx.createLinearGradient(0,0,140,44);
+  grad.addColorStop(0,'#eef1f6'); grad.addColorStop(1,'#e8e4dc');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,140,44);
+
+  // Noise lines
+  for(let i=0;i<6;i++){
+    ctx.strokeStyle=`rgba(${Math.random()*100|0},${Math.random()*100|0},${Math.random()*100|0},0.18)`;
+    ctx.lineWidth=1.5; ctx.beginPath();
+    ctx.moveTo(Math.random()*140, Math.random()*44);
+    ctx.lineTo(Math.random()*140, Math.random()*44); ctx.stroke();
+  }
+
+  // Noise dots
+  for(let i=0;i<40;i++){
+    ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.12})`;
+    ctx.fillRect(Math.random()*140|0, Math.random()*44|0, 2, 2);
+  }
+
+  // Draw equation text with slight rotation per char
+  const text = `${a} ${op} ${b} = ?`;
+  const fonts=['Georgia','Times New Roman','serif'];
+  ctx.save();
+  ctx.translate(70,22);
+  const totalW = text.length*10;
+  let xOff = -totalW/2;
+  for(const ch of text){
+    ctx.save();
+    ctx.translate(xOff,0);
+    ctx.rotate((Math.random()-0.5)*0.25);
+    ctx.font=`bold ${18+Math.random()*4|0}px ${fonts[Math.floor(Math.random()*fonts.length)]}`;
+    ctx.fillStyle=`hsl(${210+Math.random()*30|0},60%,${25+Math.random()*15|0}%)`;
+    ctx.fillText(ch,0,6);
+    ctx.restore();
+    xOff+=12;
+  }
+  ctx.restore();
+  document.getElementById('captcha-input').value='';
+}
+document.addEventListener('DOMContentLoaded', genCaptcha);
+setTimeout(genCaptcha, 100);
+
+function login(){
+  const e=document.getElementById('login-email').value;
+  const p=document.getElementById('login-password').value;
+  const userCaptcha=parseInt(document.getElementById('captcha-input').value.trim());
+  const err=document.getElementById('login-error');
+  if(isNaN(userCaptcha)||userCaptcha!==captchaAnswer){
+    err.textContent='Incorrect CAPTCHA answer. Please try again.'; err.classList.remove('hidden');
+    genCaptcha(); return;
+  }
+  if(e===ADMIN.email && p===ADMIN.password){
+    err.classList.add('hidden');
+    sessionStorage.setItem('loggedIn','1');
+    document.getElementById('login-page').classList.remove('active');
+    document.getElementById('app-page').classList.add('active');
+    seedIfEmpty();
+    show('dashboard');
+  } else {
+    err.textContent='Invalid email or password'; err.classList.remove('hidden');
+    genCaptcha();
+  }
+}
+function logout(){
+  sessionStorage.removeItem('loggedIn');
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('login-page').classList.add('active');
+}
+if(sessionStorage.getItem('loggedIn')){
+  document.getElementById('login-page').classList.remove('active');
+  document.getElementById('app-page').classList.add('active');
+  seedIfEmpty();
+  setTimeout(()=>show('dashboard'),50);
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+const titles={
+  dashboard:['Dashboard','Welcome back! Here\'s today\'s overview.'],
+  students:['Students','Manage student records and admissions.'],
+  staff:['Staff','Teaching and non-teaching staff.'],
+  fees:['Fee Management','Track collections and pending dues.'],
+  attendance:['Attendance','Mark and review daily attendance.'],
+  exams:['Examinations','Manage exam results and grades.']
+};
+let studentClassFilter='', feeStatusFilter='', examClassFilter='';
+
+function show(sec){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes("'"+sec+"'")) n.classList.add('active') });
+  const [t,s]=titles[sec]||['',''];
+  document.getElementById('page-title').textContent=t;
+  document.getElementById('page-sub').textContent=s;
+  ({dashboard:renderDashboard,students:renderStudents,staff:renderStaff,fees:renderFees,attendance:renderAttendance,exams:renderExams}[sec]||(() =>{}))();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const students=load('students').filter(s=>s.status==='active');
+  const staff=load('staff').filter(s=>s.status==='active');
+  const fees=load('fees');
+  const paid=fees.filter(f=>f.status==='paid');
+  const pending=fees.filter(f=>f.status==='pending');
+  const today=new Date().toISOString().split('T')[0];
+  const att=load('attendance').filter(a=>a.date===today);
+  const present=att.filter(a=>a.status==='present').length;
+  const absent=att.filter(a=>a.status==='absent').length;
+
+  document.getElementById('dash-metrics').innerHTML=`
+    <div class="metric-card"><span class="metric-val">${students.length}</span><span class="metric-label">Active Students</span></div>
+    <div class="metric-card"><span class="metric-val">${staff.length}</span><span class="metric-label">Staff Members</span></div>
+    <div class="metric-card"><span class="metric-val">₹${(paid.reduce((a,f)=>a+f.amount,0)/1000).toFixed(0)}K</span><span class="metric-label">Fees Collected</span></div>
+    <div class="metric-card"><span class="metric-val">₹${(pending.reduce((a,f)=>a+f.amount,0)/1000).toFixed(0)}K</span><span class="metric-label">Pending Dues</span></div>
+    <div class="metric-card"><span class="metric-val">${present||'—'}</span><span class="metric-label">Present Today</span></div>
+    <div class="metric-card"><span class="metric-val">${absent||'—'}</span><span class="metric-label">Absent Today</span></div>
+  `;
+
+  const recent=fees.sort((a,b)=>b.created-a.created).slice(0,6);
+  document.querySelector('#dash-fee-table tbody').innerHTML=recent.map(f=>`
+    <tr>
+      <td>${f.student_name}</td>
+      <td><span class="badge badge-info">${f.class}</span></td>
+      <td>₹${f.amount.toLocaleString()}</td>
+      <td>${f.fee_type}</td>
+      <td><span class="badge badge-${f.status==='paid'?'success':'warning'}">${f.status}</span></td>
+    </tr>`).join('');
+
+  const classes=['VI','VII','VIII','IX','X','XI','XII'];
+  const counts=classes.map(c=>({c,n:students.filter(s=>s.class===c).length}));
+  const max=Math.max(...counts.map(x=>x.n),1);
+  document.getElementById('class-dist').innerHTML=counts.map(({c,n})=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>Class ${c}</span><span>${n} students</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${n/max*100}%"></div></div>
+    </div>`).join('');
+}
+
+// ── STUDENTS ─────────────────────────────────────────────────────────────────
+function renderStudents(search=''){
+  let data=load('students');
+  if(studentClassFilter) data=data.filter(s=>s.class===studentClassFilter);
+  if(search) data=data.filter(s=>s.name.toLowerCase().includes(search.toLowerCase())||s.student_id.includes(search));
+  document.querySelector('#student-table tbody').innerHTML=data.length?data.map(s=>`
+    <tr>
+      <td style="font-size:11px;color:var(--muted)">${s.student_id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge badge-info">${s.class}${s.section||''}</span></td>
+      <td>${s.parent_name||'—'}</td>
+      <td>${s.phone||'—'}</td>
+      <td><span class="badge badge-${s.status==='active'?'success':'danger'}">${s.status}</span></td>
+      <td>
+        <button class="btn-sm btn-sm-danger" onclick="delStudent('${s.id}')">Remove</button>
+      </td>
+    </tr>`).join('')
+    :'<tr><td colspan="7" class="empty-row">No students found</td></tr>';
+}
+
+function addStudent(){
+  const name=document.getElementById('s-name').value.trim();
+  const msg=document.getElementById('s-msg');
+  if(!name){showMsg(msg,'Name is required','error');return}
+  const all=load('students');
+  const sid=`STU${String(all.length+1).padStart(4,'0')}`;
+  all.unshift({
+    id:uid(), student_id:sid,
+    name, email:document.getElementById('s-email').value,
+    phone:document.getElementById('s-phone').value,
+    gender:document.getElementById('s-gender').value,
+    class:document.getElementById('s-class').value,
+    section:document.getElementById('s-section').value,
+    parent_name:document.getElementById('s-parent').value,
+    parent_phone:document.getElementById('s-pphone').value,
+    dob:document.getElementById('s-dob').value,
+    status:'active', created:Date.now()
+  });
+  save('students',all);
+  showMsg(msg,`Student added! ID: ${sid}`,'success');
+  setTimeout(()=>{closeModal();renderStudents()},1200);
+}
+
+function delStudent(id){
+  if(!confirm('Remove this student?')) return;
+  const d=load('students').map(s=>s.id===id?{...s,status:'inactive'}:s);
+  save('students',d); renderStudents();
+}
+
+// ── STAFF ─────────────────────────────────────────────────────────────────────
+function renderStaff(search=''){
+  let data=load('staff').filter(s=>s.status==='active');
+  if(search) data=data.filter(s=>s.name.toLowerCase().includes(search.toLowerCase())||s.department.toLowerCase().includes(search.toLowerCase()));
+  document.querySelector('#staff-table tbody').innerHTML=data.length?data.map(s=>`
+    <tr>
+      <td style="font-size:11px;color:var(--muted)">${s.staff_id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.department}</td>
+      <td>${s.designation||'—'}</td>
+      <td>₹${Number(s.salary).toLocaleString()}</td>
+      <td><button class="btn-sm btn-sm-danger" onclick="delStaff('${s.id}')">Remove</button></td>
+    </tr>`).join('')
+    :'<tr><td colspan="6" class="empty-row">No staff found</td></tr>';
+}
+
+function addStaff(){
+  const name=document.getElementById('st-name').value.trim();
+  const dept=document.getElementById('st-dept').value.trim();
+  const msg=document.getElementById('st-msg');
+  if(!name||!dept){showMsg(msg,'Name and department required','error');return}
+  const all=load('staff');
+  const sid=`STF${String(all.length+1).padStart(3,'0')}`;
+  all.unshift({
+    id:uid(), staff_id:sid, name, department:dept,
+    email:document.getElementById('st-email').value,
+    phone:document.getElementById('st-phone').value,
+    designation:document.getElementById('st-desig').value,
+    salary:parseFloat(document.getElementById('st-salary').value)||0,
+    gender:'', status:'active', created:Date.now()
+  });
+  save('staff',all);
+  showMsg(msg,`Staff added! ID: ${sid}`,'success');
+  setTimeout(()=>{closeModal();renderStaff()},1200);
+}
+
+function delStaff(id){
+  if(!confirm('Remove this staff member?')) return;
+  const d=load('staff').map(s=>s.id===id?{...s,status:'inactive'}:s);
+  save('staff',d); renderStaff();
+}
+
+// ── FEES ──────────────────────────────────────────────────────────────────────
+function renderFees(){
+  let data=load('fees');
+  if(feeStatusFilter) data=data.filter(f=>f.status===feeStatusFilter);
+  data=data.sort((a,b)=>b.created-a.created).slice(0,100);
+  document.querySelector('#fee-table tbody').innerHTML=data.length?data.map(f=>`
+    <tr>
+      <td style="font-size:11px;color:var(--muted)">${f.receipt_no}</td>
+      <td><strong>${f.student_name}</strong></td>
+      <td><span class="badge badge-info">${f.class}</span></td>
+      <td>${f.fee_type}</td>
+      <td>${f.month||'—'}</td>
+      <td>₹${Number(f.amount).toLocaleString()}</td>
+      <td><span class="badge badge-${f.status==='paid'?'success':'warning'}">${f.status}</span></td>
+      <td>${f.status==='pending'?`<button class="btn-sm btn-sm-success" onclick="markPaid('${f.id}')">Mark Paid</button>`:'—'}</td>
+    </tr>`).join('')
+    :'<tr><td colspan="8" class="empty-row">No records found</td></tr>';
+}
+
+function markPaid(id){
+  const d=load('fees').map(f=>f.id===id?{...f,status:'paid',paid_date:new Date().toISOString().split('T')[0]}:f);
+  save('fees',d); renderFees();
+}
+
+function addFee(){
+  const sid=document.getElementById('f-student').value;
+  const amount=parseFloat(document.getElementById('f-amount').value);
+  const msg=document.getElementById('f-msg');
+  if(!sid||!amount){showMsg(msg,'Student and amount required','error');return}
+  const students=load('students');
+  const s=students.find(x=>x.id===sid);
+  if(!s){showMsg(msg,'Student not found','error');return}
+  const all=load('fees');
+  const rcp=`RCP${2000+all.length+1}`;
+  all.unshift({
+    id:uid(), student_id:sid, student_name:s.name, class:s.class,
+    amount, fee_type:document.getElementById('f-type').value,
+    month:document.getElementById('f-month').value,
+    status:document.getElementById('f-status').value,
+    receipt_no:rcp, remarks:document.getElementById('f-remarks').value,
+    paid_date:new Date().toISOString().split('T')[0], created:Date.now()
+  });
+  save('fees',all);
+  showMsg(msg,`Payment recorded! Receipt: ${rcp}`,'success');
+  setTimeout(()=>{closeModal();renderFees()},1200);
+}
+
+// ── ATTENDANCE ────────────────────────────────────────────────────────────────
+function renderAttendance(){
+  const date=document.getElementById('att-date').value||new Date().toISOString().split('T')[0];
+  if(!document.getElementById('att-date').value) document.getElementById('att-date').value=date;
+  const cls=document.getElementById('att-class').value;
+  let students=load('students').filter(s=>s.status==='active');
+  if(cls) students=students.filter(s=>s.class===cls);
+  const attMap={};
+  load('attendance').filter(a=>a.date===date).forEach(a=>attMap[a.student_id]=a.status);
+  document.querySelector('#att-table tbody').innerHTML=students.length?students.map(s=>`
+    <tr>
+      <td style="font-size:11px;color:var(--muted)">${s.student_id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.class}${s.section||''}</td>
+      <td>
+        <div class="att-radio">
+          <label><input type="radio" name="ar-${s.id}" value="present" ${(attMap[s.id]||'present')==='present'?'checked':''}/> Present</label>
+          <label><input type="radio" name="ar-${s.id}" value="absent" ${attMap[s.id]==='absent'?'checked':''}/> Absent</label>
+          <label><input type="radio" name="ar-${s.id}" value="late" ${attMap[s.id]==='late'?'checked':''}/> Late</label>
+        </div>
+      </td>
+    </tr>`).join('')
+    :'<tr><td colspan="4" class="empty-row">No students found for selected class</td></tr>';
+}
+
+function saveAttendance(){
+  const date=document.getElementById('att-date').value||new Date().toISOString().split('T')[0];
+  const rows=document.querySelectorAll('#att-table tbody tr');
+  const newRecs=[];
+  rows.forEach(row=>{
+    const radio=row.querySelector('input[type=radio]:checked');
+    if(!radio) return;
+    const studentId=radio.name.replace('ar-','');
+    const students=load('students');
+    const s=students.find(x=>x.id===studentId);
+    if(s) newRecs.push({id:uid(),student_id:studentId,student_name:s.name,class:s.class,date,status:radio.value});
+  });
+  // Remove old records for this date and these students, add new
+  const existing=load('attendance').filter(a=>!(a.date===date && newRecs.some(r=>r.student_id===a.student_id)));
+  save('attendance',[...existing,...newRecs]);
+  alert(`✅ Attendance saved for ${newRecs.length} students on ${date}`);
+}
+
+// ── EXAMS ─────────────────────────────────────────────────────────────────────
+function renderExams(){
+  let data=load('exams');
+  if(examClassFilter) data=data.filter(e=>e.class===examClassFilter);
+  const gc={'A+':'g-ap','A':'g-a','B+':'g-bp','B':'g-b','C':'g-c'};
+  document.querySelector('#exam-table tbody').innerHTML=data.length?data.map(e=>`
+    <tr>
+      <td><strong>${e.student_name}</strong></td>
+      <td><span class="badge badge-info">${e.class}</span></td>
+      <td>${e.exam_name}</td>
+      <td>${e.subject}</td>
+      <td>${e.max_marks}</td>
+      <td><strong>${e.obtained_marks}</strong></td>
+      <td><span class="grade-badge ${gc[e.grade]||'g-c'}">${e.grade}</span></td>
+    </tr>`).join('')
+    :'<tr><td colspan="7" class="empty-row">No exam records found</td></tr>';
+}
+
+function addExam(){
+  const sid=document.getElementById('e-student').value;
+  const exam=document.getElementById('e-exam').value.trim();
+  const sub=document.getElementById('e-subject').value.trim();
+  const obt=parseFloat(document.getElementById('e-obtained').value);
+  const msg=document.getElementById('e-msg');
+  if(!sid||!exam||!sub||isNaN(obt)){showMsg(msg,'All fields required','error');return}
+  const students=load('students');
+  const s=students.find(x=>x.id===sid);
+  if(!s){showMsg(msg,'Student not found','error');return}
+  const max=parseFloat(document.getElementById('e-max').value)||100;
+  const all=load('exams');
+  all.unshift({
+    id:uid(), student_id:sid, student_name:s.name, class:s.class,
+    exam_name:exam, subject:sub, max_marks:max, obtained_marks:obt,
+    grade:calcGrade((obt/max)*100), exam_date:document.getElementById('e-date').value,
+    created:Date.now()
+  });
+  save('exams',all);
+  showMsg(msg,'Result saved!','success');
+  setTimeout(()=>{closeModal();renderExams()},1200);
+}
+
+// ── MODALS ────────────────────────────────────────────────────────────────────
+function openModal(id){
+  // Populate student dropdowns
+  if(id==='m-add-fee'||id==='m-add-exam'){
+    const sel=id==='m-add-fee'?'f-student':'e-student';
+    const students=load('students').filter(s=>s.status==='active');
+    document.getElementById(sel).innerHTML=students.map(s=>`<option value="${s.id}">${s.name} (${s.class}${s.section||''})</option>`).join('');
+  }
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById(id).classList.remove('hidden');
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.add('hidden');
+  document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+  document.querySelectorAll('.alert').forEach(a=>a.classList.add('hidden'));
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function showMsg(el,text,type){
+  el.textContent=text;
+  el.className='alert alert-'+(type==='error'?'error':'success');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('login-password')?.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+</script>
+</body>
+</html>
